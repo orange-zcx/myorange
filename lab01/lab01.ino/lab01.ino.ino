@@ -1,17 +1,27 @@
-// 定义板载LED引脚，避免使用"魔法数字"
+#define TOUCH_PIN 4
 #define LED_PIN 2
+#define THRESHOLD 20
+#define DEBOUNCE_TIME 200 
+
+volatile bool ledState = false;
+volatile unsigned long lastTouchTime = 0;
+
+void gotTouch() {
+  unsigned long now = millis();
+  
+  if (now - lastTouchTime > DEBOUNCE_TIME) {
+    lastTouchTime = now;
+    ledState = !ledState;
+    digitalWrite(LED_PIN, ledState);
+  }
+}
 
 void setup() {
-  // 初始化串口通信
   Serial.begin(115200);
-  // 初始化板载LED引脚为输出模式
-  pinMode(LED_PIN, OUTPUT); 
+  pinMode(LED_PIN, OUTPUT);
+  touchAttachInterrupt(TOUCH_PIN, gotTouch, THRESHOLD);
 }
 
 void loop() {
-  Serial.println("Hello ESP32!");
-  digitalWrite(LED_PIN, HIGH);   // 点亮LED
-  delay(1000);                   // 等待1秒
-  digitalWrite(LED_PIN, LOW);    // 熄灭LED
-  delay(1000);              // 等待1秒
+  delay(100);
 }
